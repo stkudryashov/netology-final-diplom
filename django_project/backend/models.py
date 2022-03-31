@@ -4,7 +4,9 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 
 from django.contrib.auth.validators import UnicodeUsernameValidator
+
 from django.utils.translation import gettext_lazy as _
+from django_rest_passwordreset.tokens import get_token_generator
 
 
 class UserManager(BaseUserManager):
@@ -64,6 +66,15 @@ class User(AbstractUser):
         },
     )
 
+    is_active = models.BooleanField(
+        _("active"),
+        default=False,
+        help_text=_(
+            "Designates whether this user should be treated as active. "
+            "Unselect this instead of deleting accounts."
+        ),
+    )
+
     USER_TYPE = (
         ('shop', 'Магазин'),
         ('buyer', 'Покупатель'),
@@ -78,6 +89,45 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Список пользователей'
         ordering = ('email',)
+
+
+class ConfirmEmailToken(models.Model):
+    """Токен подтверждения Email"""
+
+    @staticmethod
+    def generate_key():
+        return get_token_generator().generate_token()
+
+    user = models.ForeignKey(
+        User,
+        related_name='confirm_email_tokens',
+        on_delete=models.CASCADE,
+        verbose_name=_("The User which is associated to this password reset token")
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("When was this token generated")
+    )
+
+    key = models.CharField(
+        _("Key"),
+        max_length=64,
+        db_index=True,
+        unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = self.generate_key()
+        return super(ConfirmEmailToken, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Токен подтверждения Email'
+        verbose_name_plural = 'Токены подтверждения Email'
+
+    def __str__(self):
+        return "Password reset token for user {user}".format(user=self.user)
 
 
 class Shop(models.Model):

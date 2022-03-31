@@ -3,7 +3,10 @@ from django.contrib.auth.password_validation import validate_password
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
+from backend.models import ConfirmEmailToken
 from backend.serializers import UserSerializer
+
+from backend.signals import new_user_registered
 
 
 class RegisterAccount(APIView):
@@ -32,8 +35,33 @@ class RegisterAccount(APIView):
                     user.set_password(request.data['password'])
                     user.save()
 
+                    new_user_registered.send(sender=self.__class__, user_id=user.id)
+
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class ConfirmAccount(APIView):
+    """Класс для подтверждения почтового адреса"""
+
+    def post(self, request, *args, **kwargs):
+        if {'email', 'token'}.issubset(request.data):
+
+            token = ConfirmEmailToken.objects.filter(
+                user__email=request.data['email'],
+                key=request.data['token']
+            ).first()
+
+            if token:
+                token.user.is_active = True
+                token.user.save()
+                token.delete()
+
+                return JsonResponse({'Status': True})
+            else:
+                return JsonResponse({'Status': False, 'Errors': 'Неправильно указан токен или email'})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})

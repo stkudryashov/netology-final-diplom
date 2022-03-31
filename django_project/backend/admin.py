@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from backend.models import User
+from backend.models import User, ConfirmEmailToken
 
 
 @admin.register(User)
@@ -19,3 +19,8 @@ class CustomUserAdmin(UserAdmin):
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     list_display = ('email', 'first_name', 'last_name', 'is_staff')
+
+
+@admin.register(ConfirmEmailToken)
+class ConfirmEmailTokenAdmin(admin.ModelAdmin):
+    list_display = ('user', 'key', 'created_at')
