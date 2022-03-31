@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',
+
+    'backend.apps.BackendConfig',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +94,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'backend.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
