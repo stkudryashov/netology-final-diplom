@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from backend.models import User, ConfirmEmailToken
+from backend.models import Contact
 
 
 @admin.register(User)
@@ -24,3 +25,8 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(ConfirmEmailToken)
 class ConfirmEmailTokenAdmin(admin.ModelAdmin):
     list_display = ('user', 'key', 'created_at')
+
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    pass
