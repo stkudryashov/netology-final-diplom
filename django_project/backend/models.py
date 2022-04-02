@@ -18,6 +18,7 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given username, email, and password.
         """
+
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
@@ -33,6 +34,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_superuser', True)
 
         if extra_fields.get('is_staff') is not True:
@@ -139,6 +141,8 @@ class Shop(models.Model):
     state = models.BooleanField(default=True, verbose_name='Принимает заказы')
     created_at = models.DateField(auto_now_add=True, verbose_name='Дата создания')
 
+    user = models.OneToOneField(User, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Пользователь')
+
     class Meta:
         verbose_name = 'Магазин'
         verbose_name_plural = 'Список магазинов'
@@ -203,6 +207,36 @@ class ProductInfo(models.Model):
 
         constraints = [
             models.UniqueConstraint(fields=['product', 'shop', 'external_id'], name='unique_product_info'),
+        ]
+
+
+class Parameter(models.Model):
+    name = models.CharField(max_length=64, verbose_name='Название')
+
+    class Meta:
+        verbose_name = 'Имя параметра'
+        verbose_name_plural = 'Список имен параметров'
+        ordering = ('-name',)
+
+    def __str__(self):
+        return self.name
+
+
+class ProductParameter(models.Model):
+    product_info = models.ForeignKey(ProductInfo, related_name='product_parameters', blank=True,
+                                     on_delete=models.CASCADE, verbose_name='Информация о продукте')
+
+    parameter = models.ForeignKey(Parameter, related_name='product_parameters', blank=True, on_delete=models.CASCADE,
+                                  verbose_name='Параметр')
+
+    value = models.CharField(max_length=128, verbose_name='Значение')
+
+    class Meta:
+        verbose_name = 'Параметр'
+        verbose_name_plural = 'Список параметров'
+
+        constraints = [
+            models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
         ]
 
 

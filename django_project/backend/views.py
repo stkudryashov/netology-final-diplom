@@ -3,19 +3,27 @@ from django.contrib.auth.password_validation import validate_password
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
-from backend.models import ConfirmEmailToken
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
+
 from backend.serializers import UserSerializer, ContactSerializer
+from backend.serializers import ShopSerializer
 
 from backend.signals import new_user_registered
+from yaml import load as load_yaml, Loader
 
 from django.db.models import Q
+from distutils.util import strtobool
 
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from rest_framework.permissions import IsAuthenticated
 
-from backend.models import Contact
+from backend.permissions import IsShopUser
+
+from backend.models import ConfirmEmailToken, Contact
+from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter
+
+import requests
 
 
 class RegisterAccount(APIView):
@@ -136,5 +144,90 @@ class ContactView(APIView):
             if objects_deleted:
                 deleted_count = Contact.objects.filter(query).delete()[0]
                 return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class SellerUpdateCatalog(APIView):
+    """Класс для обновления каталога от продавца"""
+
+    permission_classes = [IsAuthenticated, IsShopUser]
+
+    def post(self, request, *args, **kwargs):
+        url = request.data.get('url')
+
+        if url:
+            validate_url = URLValidator()
+
+            try:
+                validate_url(url)
+            except ValidationError as e:
+                return JsonResponse({'Status': False, 'Error': str(e)})
+            else:
+                stream = requests.get(url).content
+                data = load_yaml(stream, Loader=Loader)
+
+                if not Shop.objects.filter(user_id=request.user.id).exists():
+                    shop = Shop.objects.create(name=data['shop'], user_id=request.user.id)
+                else:
+                    shop = Shop.objects.get(user_id=request.user.id)
+
+                shop.name = data['shop']
+                shop.save()
+
+                for category in data['categories']:
+                    if not Category.objects.filter(id=category['id']).exists():
+                        category_object = Category.objects.create(id=category['id'], name=category['name'])
+                    else:
+                        category_object = Category.objects.get(id=category['id'])
+
+                    category_object.shops.add(shop.id)
+                    category_object.save()
+
+                ProductInfo.objects.filter(shop_id=shop.id).delete()
+
+                for item in data['goods']:
+                    product, _ = Product.objects.get_or_create(name=item['name'], category_id=item['category'])
+
+                    product_info = ProductInfo.objects.create(product_id=product.id,
+                                                              external_id=item['id'],
+                                                              model=item['model'],
+                                                              price=item['price'],
+                                                              price_rrc=item['price_rrc'],
+                                                              quantity=item['quantity'],
+                                                              shop_id=shop.id)
+
+                    for name, value in item['parameters'].items():
+                        parameter_object, _ = Parameter.objects.get_or_create(name=name)
+                        ProductParameter.objects.create(product_info_id=product_info.id,
+                                                        parameter_id=parameter_object.id,
+                                                        value=value)
+
+                return JsonResponse({'Status': True})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class SellerState(APIView):
+    """Класс для работы со статусом продавца"""
+
+    permission_classes = [IsAuthenticated, IsShopUser]
+
+    # Получить текущий статус
+    def get(self, request, *args, **kwargs):
+        shop = request.user.shop
+        serializer = ShopSerializer(shop)
+        return Response(serializer.data)
+
+    # Изменить текущий статус
+    def post(self, request, *args, **kwargs):
+        state = request.data.get('state')
+
+        if state:
+            try:
+                Shop.objects.filter(user_id=request.user.id).update(state=strtobool(state))
+                return JsonResponse({'Status': True})
+            except ValueError as error:
+                return JsonResponse({'Status': False, 'Errors': str(error)})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
