@@ -7,31 +7,20 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: orders
+    env_file:
+      - ./.env
     restart: always
   backend:
     build: ./django_project
-    entrypoint: ./entrypoint.sh
-    command: python /usr/src/app/manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./django_project:/usr/src/app
     ports:
       - '8000:8000'
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: orders
-
-      DB_HOST: database
-      DB_PORT: 5432
-
-      EMAIL_HOST: smtp.yandex.ru
-      EMAIL_HOST_USER: email@yandex.ru
-      EMAIL_HOST_PASSWORD: stmp_password
-      EMAIL_PORT: 465
+    env_file:
+      - ./.env
     depends_on:
       - database
 
