@@ -1,6 +1,6 @@
 from django.urls import path
 
-from backend.views import RegisterAccount, ConfirmAccount, ContactView
+from backend.views import RegisterAccount, ConfirmAccount, ContactView, AccountDetails
 from backend.views import SellerUpdateCatalog, SellerState
 
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
@@ -23,6 +23,7 @@ urlpatterns = [
 
     # CRUD для контактов пользователя
     path('user/contacts', ContactView.as_view(), name='user-contacts'),
+    path('user/details', AccountDetails.as_view(), name='user-details'),
 
     # Обновление каталога и статуса продавца
     path('seller/update', SellerUpdateCatalog.as_view(), name='seller-update-catalog'),

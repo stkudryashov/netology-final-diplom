@@ -27,7 +27,7 @@ import requests
 
 
 class RegisterAccount(APIView):
-    """Регистрация клиента"""
+    """Регистрация пользователя"""
 
     def post(self, request, *args, **kwargs):
         if {'first_name', 'last_name', 'email', 'password'}.issubset(request.data):
@@ -82,6 +82,42 @@ class ConfirmAccount(APIView):
                 return JsonResponse({'Status': False, 'Errors': 'Неправильно указан токен или email'})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class AccountDetails(APIView):
+    """Класс для просмотра и редактирования данных пользователя"""
+
+    permission_classes = [IsAuthenticated]
+
+    # Получить мою информацию
+    def get(self, request, *args, **kwargs):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    # Редактирование моей информации
+    def post(self, request, *args, **kwargs):
+        # Если в request.data есть пароль
+        if 'password' in request.data:
+            # Проверка пароля на сложность
+            try:
+                validate_password(request.data['password'])
+            except Exception as password_error:
+                error_array = []
+                # noinspection PyTypeChecker
+                for item in password_error:
+                    error_array.append(item)
+                return JsonResponse({'Status': False, 'Errors': {'password': error_array}})
+            else:
+                request.user.set_password(request.data['password'])
+
+        # Проверка остальных данных
+        user_serializer = UserSerializer(request.user, data=request.data, partial=True)
+
+        if user_serializer.is_valid():
+            user_serializer.save()
+            return JsonResponse({'Status': True})
+        else:
+            return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
 
 
 class ContactView(APIView):
