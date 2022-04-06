@@ -214,6 +214,8 @@ class ProductInfo(models.Model):
 
 
 class Parameter(models.Model):
+    """Название параметра"""
+
     name = models.CharField(max_length=64, verbose_name='Название')
 
     class Meta:
@@ -226,6 +228,8 @@ class Parameter(models.Model):
 
 
 class ProductParameter(models.Model):
+    """Параметр продукта"""
+
     product_info = models.ForeignKey(ProductInfo, related_name='product_parameters', blank=True,
                                      on_delete=models.CASCADE, verbose_name='Информация о продукте')
 
@@ -236,7 +240,7 @@ class ProductParameter(models.Model):
 
     class Meta:
         verbose_name = 'Параметр'
-        verbose_name_plural = 'Параметры продуктов'
+        verbose_name_plural = 'Параметры товаров'
 
         constraints = [
             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
