@@ -1,13 +1,14 @@
 from django.contrib.auth.password_validation import validate_password
 
 from django.http import JsonResponse
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
 from backend.serializers import UserSerializer, ContactSerializer
-from backend.serializers import ShopSerializer, ProductInfoSerializer
+from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
 
 from backend.signals import new_user_registered
 from yaml import load as load_yaml, Loader
@@ -203,11 +204,14 @@ class SellerUpdateCatalog(APIView):
                 stream = requests.get(url).content
                 data = load_yaml(stream, Loader=Loader)
 
+                # Если у пользователя нет магазина - создать
                 if not Shop.objects.filter(user_id=request.user.id).exists():
                     shop = Shop.objects.create(name=data['shop'], user_id=request.user.id)
+                # Иначе получить магазин
                 else:
                     shop = Shop.objects.get(user_id=request.user.id)
 
+                # И обновить название
                 shop.name = data['shop']
                 shop.save()
 
@@ -295,3 +299,17 @@ class ProductInfoView(APIView):
         serializer = ProductInfoSerializer(queryset, many=True)
 
         return Response(serializer.data)
+
+
+class CategoryView(ListAPIView):
+    """Класс для просмотра категорий"""
+
+    queryset = Category.objects.filter(shops__state=True)
+    serializer_class = CategorySerializer
+
+
+class ShopView(ListAPIView):
+    """Класс для просмотра списка магазинов"""
+
+    queryset = Shop.objects.filter(state=True)
+    serializer_class = ShopSerializer
