@@ -2,7 +2,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from backend.models import User, Contact, ConfirmEmailToken
-from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter
+from backend.models import Parameter, ProductParameter
+from backend.models import Product, ProductInfo
+from backend.models import Order, OrderItem
+from backend.models import Shop, Category
 
 
 @admin.register(User)
@@ -60,7 +63,8 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductInfo)
 class ProductInfoAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('shop', 'model', 'external_id', 'quantity', 'price', 'price_rrc')
+    search_fields = ('model', 'external_id')
 
 
 @admin.register(Parameter)
@@ -70,4 +74,14 @@ class ParameterAdmin(admin.ModelAdmin):
 
 @admin.register(ProductParameter)
 class ProductParameterAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
     pass

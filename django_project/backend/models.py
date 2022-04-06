@@ -89,7 +89,7 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = 'Пользователь'
-        verbose_name_plural = 'Список пользователей'
+        verbose_name_plural = 'Пользователи'
         ordering = ('email',)
 
 
@@ -145,7 +145,7 @@ class Shop(models.Model):
 
     class Meta:
         verbose_name = 'Магазин'
-        verbose_name_plural = 'Список магазинов'
+        verbose_name_plural = 'Магазины'
         ordering = ('-name',)
 
     def __str__(self):
@@ -160,7 +160,7 @@ class Category(models.Model):
 
     class Meta:
         verbose_name = 'Категория'
-        verbose_name_plural = 'Список категорий'
+        verbose_name_plural = 'Категории'
         ordering = ('-name',)
 
     def __str__(self):
@@ -176,8 +176,8 @@ class Product(models.Model):
                                  verbose_name='Категория')
 
     class Meta:
-        verbose_name = 'Продукт'
-        verbose_name_plural = 'Список продуктов'
+        verbose_name = 'Товар'
+        verbose_name_plural = 'Товары'
         ordering = ('-name',)
 
     def __str__(self):
@@ -202,12 +202,15 @@ class ProductInfo(models.Model):
     price_rrc = models.PositiveIntegerField(verbose_name='Рекомендуемая розничная цена')
 
     class Meta:
-        verbose_name = 'Информация о продукте'
-        verbose_name_plural = 'Информационный список о продуктах'
+        verbose_name = 'Информация о товаре'
+        verbose_name_plural = 'Информация о товарах'
 
         constraints = [
             models.UniqueConstraint(fields=['product', 'shop', 'external_id'], name='unique_product_info'),
         ]
+
+    def __str__(self):
+        return str(self.external_id)
 
 
 class Parameter(models.Model):
@@ -233,11 +236,14 @@ class ProductParameter(models.Model):
 
     class Meta:
         verbose_name = 'Параметр'
-        verbose_name_plural = 'Список параметров'
+        verbose_name_plural = 'Параметры продуктов'
 
         constraints = [
             models.UniqueConstraint(fields=['product_info', 'parameter'], name='unique_product_parameter'),
         ]
+
+    def __str__(self):
+        return f'{self.product_info.model} | {self.parameter.name}'
 
 
 class Contact(models.Model):
@@ -258,7 +264,7 @@ class Contact(models.Model):
 
     class Meta:
         verbose_name = 'Контакты пользователя'
-        verbose_name_plural = 'Список контактов пользователя'
+        verbose_name_plural = 'Список контактов'
 
     def __str__(self):
         return f'{self.city} {self.street} {self.house}'
@@ -286,7 +292,7 @@ class Order(models.Model):
 
     class Meta:
         verbose_name = 'Заказ'
-        verbose_name_plural = 'Список заказ'
+        verbose_name_plural = 'Заказы'
         ordering = ('-created_at',)
 
     def __str__(self):
@@ -306,7 +312,7 @@ class OrderItem(models.Model):
 
     class Meta:
         verbose_name = 'Заказанная позиция'
-        verbose_name_plural = 'Список заказанных позиций'
+        verbose_name_plural = 'Заказанные позиции'
 
         constraints = [
             models.UniqueConstraint(fields=['order_id', 'product_info'], name='unique_order_item')
