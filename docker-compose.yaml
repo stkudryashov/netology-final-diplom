@@ -13,7 +13,8 @@ services:
   backend:
     build: ./django_project
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py makemigrations backend &&
+             python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./django_project:/usr/src/app
