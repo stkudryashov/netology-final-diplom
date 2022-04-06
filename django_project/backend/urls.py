@@ -1,6 +1,6 @@
 from django.urls import path
 
-from backend.views import RegisterAccount, ConfirmAccount, ContactView, AccountDetails
+from backend.views import RegisterAccount, ConfirmAccount, ContactView, AccountDetails, CartView
 from backend.views import SellerUpdateCatalog, SellerState, ProductInfoView, CategoryView, ShopView
 
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
@@ -33,4 +33,7 @@ urlpatterns = [
     path('catalog/products', ProductInfoView.as_view(), name='products'),
     path('catalog/categories', CategoryView.as_view(), name='categories'),
     path('catalog/shops', ShopView.as_view(), name='shops'),
+
+    # CRUD для работы с корзиной покупателя
+    path('cart', CartView.as_view(), name='cart'),
 ]

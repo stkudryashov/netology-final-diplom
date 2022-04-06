@@ -1,19 +1,24 @@
-from django.contrib.auth.password_validation import validate_password
-
 from django.http import JsonResponse
+from django.db import IntegrityError
+
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
+from django.contrib.auth.password_validation import validate_password
+
 from backend.serializers import UserSerializer, ContactSerializer
+from backend.serializers import OrderItemSerializer, OrderSerializer
 from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
 
 from backend.signals import new_user_registered
-from yaml import load as load_yaml, Loader
 
-from django.db.models import Q
+from yaml import load as load_yaml, Loader
+from ujson import loads as load_json
+
+from django.db.models import Q, F, Sum
 from distutils.util import strtobool
 
 from rest_framework.response import Response
@@ -21,8 +26,12 @@ from rest_framework.permissions import IsAuthenticated
 
 from backend.permissions import IsShopUser
 
-from backend.models import ConfirmEmailToken, Contact
-from backend.models import Shop, Category, Product, ProductInfo, Parameter, ProductParameter
+from backend.models import Contact, ConfirmEmailToken
+from backend.models import Parameter, ProductParameter
+from backend.models import Product, ProductInfo
+from backend.models import Order, OrderItem
+from backend.models import Shop, Category
+
 
 import requests
 
@@ -313,3 +322,96 @@ class ShopView(ListAPIView):
 
     queryset = Shop.objects.filter(state=True)
     serializer_class = ShopSerializer
+
+
+class CartView(APIView):
+    """Класс для работы с корзиной покупателя"""
+
+    permission_classes = [IsAuthenticated]
+
+    # Получить корзину
+    def get(self, request, *args, **kwargs):
+        cart = Order.objects.filter(
+            user_id=request.user.id, status='cart').prefetch_related(
+            'ordered_items__product_info__product__category',
+            'ordered_items__product_info__product_parameters__parameter').annotate(
+            total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+
+        serializer = OrderSerializer(cart, many=True)
+        return Response(serializer.data)
+
+    # Добавить товары в корзину
+    def post(self, request, *args, **kwargs):
+        items_sting = request.data.get('items')
+
+        if items_sting:
+            try:
+                items_dict = load_json(items_sting)
+            except ValueError:
+                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+            else:
+                cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
+                objects_created = 0
+
+                for order_item in items_dict:
+                    order_item.update({'order': cart.id})
+                    serializer = OrderItemSerializer(data=order_item)
+
+                    if serializer.is_valid():
+                        try:
+                            serializer.save()
+                        except IntegrityError as error:
+                            return JsonResponse({'Status': False, 'Errors': str(error)})
+                        else:
+                            objects_created += 1
+                    else:
+                        JsonResponse({'Status': False, 'Errors': serializer.errors})
+
+                return JsonResponse({'Status': True, 'Создано объектов': objects_created})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+    # Редактировать количество товаров в корзине
+    def patch(self, request, *args, **kwargs):
+        items_sting = request.data.get('items')
+
+        if items_sting:
+            try:
+                items_dict = load_json(items_sting)
+            except ValueError:
+                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+            else:
+                cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
+                objects_updated = 0
+
+                for order_item in items_dict:
+                    if type(order_item['id']) == int and type(order_item['quantity']) == int:
+                        objects_updated += OrderItem.objects.filter(order_id=cart.id, id=order_item['id']).update(
+                            quantity=order_item['quantity'])
+
+                return JsonResponse({'Status': True, 'Обновлено объектов': objects_updated})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+    # Удалить товары из корзины
+    def delete(self, request, *args, **kwargs):
+        items_sting = request.data.get('items')
+
+        if items_sting:
+            items_list = items_sting.split(',')
+
+            cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
+
+            query = Q()
+            objects_deleted = False
+
+            for order_item_id in items_list:
+                if order_item_id.isdigit():
+                    query = query | Q(order_id=cart.id, id=order_item_id)
+                    objects_deleted = True
+
+            if objects_deleted:
+                deleted_count = OrderItem.objects.filter(query).delete()[0]
+                return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})

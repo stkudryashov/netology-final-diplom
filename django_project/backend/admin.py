@@ -79,7 +79,8 @@ class ProductParameterAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user', 'status', 'created_at')
+    list_filter = ('status',)
 
 
 @admin.register(OrderItem)
