@@ -9,6 +9,7 @@ from django.core.validators import URLValidator
 
 from django.contrib.auth.password_validation import validate_password
 
+from backend.filters import ProductInfoFilter
 from backend.serializers import UserSerializer, ContactSerializer
 from backend.serializers import OrderItemSerializer, OrderSerializer
 from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
@@ -282,32 +283,15 @@ class SellerState(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
-class ProductInfoView(APIView):
+class ProductInfoView(ListAPIView):
     """Класс для поиска товаров"""
 
-    def get(self, request, *args, **kwargs):
-        query = Q(shop__state=True)
+    queryset = ProductInfo.objects.filter(shop__state=True).select_related(
+        'shop', 'product__category'
+    ).prefetch_related('product_parameters__parameter').distinct()
 
-        product_name = request.query_params.get('product_name')
-        shop_id = request.query_params.get('shop_id')
-        category_id = request.query_params.get('category_id')
-
-        if product_name:
-            query = query & Q(product__name__icontains=product_name)
-
-        if shop_id:
-            query = query & Q(shop_id=shop_id)
-
-        if category_id:
-            query = query & Q(product__category_id=category_id)
-
-        queryset = ProductInfo.objects.filter(query).select_related(
-            'shop', 'product__category'
-        ).prefetch_related('product_parameters__parameter').distinct()
-
-        serializer = ProductInfoSerializer(queryset, many=True)
-
-        return Response(serializer.data)
+    serializer_class = ProductInfoSerializer
+    filterset_class = ProductInfoFilter
 
 
 class CategoryView(ListAPIView):
