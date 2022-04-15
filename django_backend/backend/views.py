@@ -10,11 +10,12 @@ from django.core.validators import URLValidator
 from django.contrib.auth.password_validation import validate_password
 
 from backend.filters import ProductInfoFilter
+
 from backend.serializers import UserSerializer, ContactSerializer
 from backend.serializers import OrderItemSerializer, OrderSerializer
 from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
 
-from backend.signals import new_user_registered
+from backend.signals import new_user_registered, new_user_order
 
 from yaml import load as load_yaml, Loader
 from ujson import loads as load_json
@@ -397,5 +398,79 @@ class CartView(APIView):
             if objects_deleted:
                 deleted_count = OrderItem.objects.filter(query).delete()[0]
                 return JsonResponse({'Status': True, 'Удалено объектов': deleted_count})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class OrderView(APIView):
+    """Класс для получения заказов и оформления их из корзины"""
+
+    permission_classes = [IsAuthenticated]
+
+    # Получить список моих заказов
+    def get(self, request, *args, **kwargs):
+        order = Order.objects.filter(
+            user_id=request.user.id).exclude(status='cart').prefetch_related(
+            'ordered_items__product_info__product__category',
+            'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
+            total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
+
+    # Оформить заказ из корзины
+    def post(self, request, *args, **kwargs):
+        if {'cart_id', 'contact'}.issubset(request.data):
+            if request.data['cart_id'].isdigit():
+                try:
+                    is_updated = Order.objects.filter(
+                        user_id=request.user.id, id=request.data['cart_id']).update(
+                        contact_id=request.data['contact'],
+                        status='new')
+                except IntegrityError as error:
+                    return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
+                else:
+                    if is_updated:
+                        new_user_order.send(sender=self.__class__, user_id=request.user.id, status='new')
+                        return JsonResponse({'Status': True})
+
+        return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+class SellerOrderView(APIView):
+    """Класс для получения заказов продавцами"""
+
+    permission_classes = [IsAuthenticated, IsShopUser]
+
+    # Получить заказы
+    def get(self, request, *args, **kwargs):
+        order = Order.objects.filter(
+            ordered_items__product_info__shop__user_id=request.user.id).exclude(status='cart').prefetch_related(
+            'ordered_items__product_info__product__category',
+            'ordered_items__product_info__product_parameters__parameter').select_related('contact').annotate(
+            total_sum=Sum(F('ordered_items__quantity') * F('ordered_items__product_info__price'))).distinct()
+
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
+
+    # Изменить статус заказа
+    def patch(self, request, *args, **kwargs):
+        order_id = request.data.get('order_id')
+        status = request.data.get('status')
+
+        if status not in [status[0] for status in Order.ORDER_STATUS]:
+            return JsonResponse({'Status': False, 'Errors': 'Указан неверный статус заказа'})
+
+        if order_id and status:
+            try:
+                is_updated = Order.objects.filter(
+                    ordered_items__product_info__shop__user_id=request.user.id, id=order_id
+                ).exclude(status__in=['cart', 'delivered']).update(status=status)
+            except ValueError as error:
+                return JsonResponse({'Status': False, 'Errors': str(error)})
+            else:
+                if is_updated:
+                    new_user_order.send(sender=self.__class__, user_id=request.user.id, status=status)
+                    return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
