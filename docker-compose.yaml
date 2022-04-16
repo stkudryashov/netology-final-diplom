@@ -28,8 +28,9 @@ services:
     build: ./vue_frontend
     command: >
       sh -c "npm run serve"
-#    volumes:
-#      - ./vue_frontend:/usr/src/app
+    volumes:
+      - ./vue_frontend/public:/usr/src/app/public
+      - ./vue_frontend/src:/usr/src/app/src
     ports:
       - '8080:8080'
     depends_on:
