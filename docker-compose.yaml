@@ -24,6 +24,16 @@ services:
       - ./.env
     depends_on:
       - database
+  frontend:
+    build: ./vue_frontend
+    command: >
+      sh -c "npm run serve"
+#    volumes:
+#      - ./vue_frontend:/usr/src/app
+    ports:
+      - '8080:8080'
+    depends_on:
+      - backend
 
 volumes:
   postgres-data:
