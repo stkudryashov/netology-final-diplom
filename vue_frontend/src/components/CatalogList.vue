@@ -7,9 +7,9 @@
             <img alt="ecommerce" class="object-cover object-center w-full h-full block" src="https://dummyimage.com/420x260">
           </a>
           <div class="mt-4">
-            <h3 class="text-gray-500 text-xs tracking-widest title-font mb-1">{{ product.category }}</h3>
+            <h3 class="text-gray-500 text-xs tracking-widest title-font mb-1">{{ product.product.category }}</h3>
             <h2 class="text-white title-font text-lg font-medium">
-              <router-link :to="`/${product.id}`">{{ product.name }}</router-link>
+              <router-link :to="`/${product.id}`">{{ product.product.name }}</router-link>
             </h2>
             <p class="mt-1">₽{{ product.price }}</p>
           </div>
@@ -26,23 +26,33 @@ export default {
   name: "CatalogList",
   data() {
     return {
-      products : []
+      products : [
+        {
+          "id": 1,
+          "model": "apple/iphone/xr",
+          "product": {
+            "name": "Смартфон Apple iPhone XR 256GB (красный)",
+            "category": "Смартфоны"
+          },
+          "shop": 1,
+          "quantity": 9,
+          "price": 65000,
+          "price_rrc": 69990,
+          "product_parameters": [
+            {
+              "parameter": "Диагональ (дюйм)",
+              "value": "6.1"
+            },
+          ]
+        }
+      ]
     }
   },
   methods: {
     async fetchProducts() {
       const response = await axios.get('http://localhost:8000/api/v1/catalog/products');
-
-      response.data.results.forEach(product => this.products.push({
-        id: product.id,
-        name: product['product']['name'],
-        category: product['product']['category'],
-        price: product['price']
-      }))
+      this.products = response.data['results']
     },
-    getProduct(id) {
-      this.$router.push({name: 'product', params: {id: id}})
-    }
   },
   mounted() {
     this.fetchProducts();
