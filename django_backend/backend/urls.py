@@ -1,7 +1,8 @@
 from django.urls import path
 
 from backend.views import RegisterAccount, ConfirmAccount, ContactView, AccountDetails, CartView, OrderView
-from backend.views import SellerUpdateCatalog, SellerState, ProductInfoView, CategoryView, ShopView, SellerOrderView
+from backend.views import SellerUpdateCatalog, SellerState, ShopView, SellerOrderView
+from backend.views import ProductInfoRetrieve, ProductInfoView, CategoryView
 
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -31,6 +32,7 @@ urlpatterns = [
     path('seller/orders', SellerOrderView.as_view(), name='seller-orders'),
 
     # Просмотр каталога товаров
+    path('catalog/products/<int:pk>', ProductInfoRetrieve.as_view(), name='product-info'),
     path('catalog/products', ProductInfoView.as_view(), name='products'),
     path('catalog/categories', CategoryView.as_view(), name='categories'),
     path('catalog/shops', ShopView.as_view(), name='shops'),
