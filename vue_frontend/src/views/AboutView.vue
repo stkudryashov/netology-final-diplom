@@ -1,6 +1,4 @@
 <template>
-  <div>
-  <MyHeader msg="Netology Shop"/>
   <section class="text-gray-400 bg-gray-900 body-font">
     <div class="container px-5 py-24 mx-auto">
       <div class="xl:w-1/2 lg:w-3/4 w-full mx-auto text-center">
@@ -14,7 +12,6 @@
       </div>
     </div>
   </section>
-  </div>
 </template>
 
 <script>

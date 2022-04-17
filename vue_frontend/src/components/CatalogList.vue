@@ -8,7 +8,9 @@
           </a>
           <div class="mt-4">
             <h3 class="text-gray-500 text-xs tracking-widest title-font mb-1">{{ product.category }}</h3>
-            <h2 class="text-white title-font text-lg font-medium">{{ product.name }}</h2>
+            <h2 class="text-white title-font text-lg font-medium">
+              <router-link :to="`/${product.id}`">{{ product.name }}</router-link>
+            </h2>
             <p class="mt-1">₽{{ product.price }}</p>
           </div>
         </div>
@@ -37,6 +39,9 @@ export default {
         category: product['product']['category'],
         price: product['price']
       }))
+    },
+    getProduct(id) {
+      this.$router.push({name: 'product', params: {id: id}})
     }
   },
   mounted() {

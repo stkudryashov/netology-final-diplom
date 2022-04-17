@@ -1,6 +1,17 @@
 <template>
+  <my-header msg="Netology Shop"/>
   <router-view/>
 </template>
+
+<script>
+import MyHeader from '@/components/MyHeader.vue'
+
+export default {
+  components: {
+    MyHeader
+  }
+}
+</script>
 
 <style>
   body {
