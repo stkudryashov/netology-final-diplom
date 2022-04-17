@@ -154,7 +154,7 @@ class ContactView(APIView):
                 serializer.save()
                 return JsonResponse({'Status': True})
             else:
-                JsonResponse({'Status': False, 'Errors': serializer.errors})
+                return JsonResponse({'Status': False, 'Errors': serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -171,7 +171,7 @@ class ContactView(APIView):
                         serializer.save()
                         return JsonResponse({'Status': True})
                     else:
-                        JsonResponse({'Status': False, 'Errors': serializer.errors})
+                        return JsonResponse({'Status': False, 'Errors': serializer.errors})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
@@ -333,7 +333,7 @@ class CartView(APIView):
             try:
                 items_dict = load_json(items_sting)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                return JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
                 cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
                 objects_created = 0
@@ -350,7 +350,7 @@ class CartView(APIView):
                         else:
                             objects_created += 1
                     else:
-                        JsonResponse({'Status': False, 'Errors': serializer.errors})
+                        return JsonResponse({'Status': False, 'Errors': serializer.errors})
 
                 return JsonResponse({'Status': True, 'Создано объектов': objects_created})
 
@@ -364,7 +364,7 @@ class CartView(APIView):
             try:
                 items_dict = load_json(items_sting)
             except ValueError:
-                JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
+                return JsonResponse({'Status': False, 'Errors': 'Неверный формат запроса'})
             else:
                 cart, _ = Order.objects.get_or_create(user_id=request.user.id, status='cart')
                 objects_updated = 0
