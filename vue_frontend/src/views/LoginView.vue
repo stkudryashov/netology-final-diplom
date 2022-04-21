@@ -44,7 +44,9 @@ export default {
         }
       })
       .then(response => {
-        console.log(response['data']['access'])
+        console.log(response['data']['access']);
+        document.cookie = `access=${response['data']['access']};`
+        document.cookie = `username=${this.login};`
       })
       .catch(error => {
         console.log(error.response)
