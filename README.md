@@ -24,3 +24,8 @@ EMAIL_HOST_PASSWORD=password
 EMAIL_PORT=465
 ```
 * В директории **_netology-final-diplom_** выполнить `docker-compose up --build -d`
+
+### Сервисы будут запущены на этих портах
+
+* Backend: 127.0.0.1:8000
+* Frontend: 127.0.0.1:8080
