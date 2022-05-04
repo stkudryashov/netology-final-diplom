@@ -35,6 +35,18 @@ services:
       - '8080:8080'
     depends_on:
       - backend
+  redis:
+    image: redis:7.0.0-alpine
+    restart: always
+  celery:
+    build: ./django_backend
+    command: celery -A config worker --loglevel=INFO
+    env_file:
+      - ./.env
+    depends_on:
+      - database
+      - backend
+      - redis
 
 volumes:
   postgres-data:

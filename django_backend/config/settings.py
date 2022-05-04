@@ -64,6 +64,10 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+
+CELERY_BROKER_URL = 'redis://redis:6379'
+
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

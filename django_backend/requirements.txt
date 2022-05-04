@@ -4,6 +4,8 @@ django-filter==21.1
 django-rest-passwordreset==1.2.1
 djangorestframework-simplejwt==5.1.0
 django-cors-headers==3.11.0
+celery==5.2.6
+redis==4.2.2
 psycopg2-binary==2.9.3
 requests==2.27.1
 pyyaml==6.0

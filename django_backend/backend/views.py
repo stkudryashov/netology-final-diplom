@@ -15,7 +15,8 @@ from backend.serializers import UserSerializer, ContactSerializer
 from backend.serializers import OrderItemSerializer, OrderSerializer
 from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
 
-from backend.signals import new_user_registered, new_user_order
+from backend.signals import new_user_order
+from backend import tasks
 
 from yaml import load as load_yaml, Loader
 from ujson import loads as load_json
@@ -64,7 +65,7 @@ class RegisterAccount(APIView):
                     user.set_password(request.data['password'])
                     user.save()
 
-                    new_user_registered.send(sender=self.__class__, user_id=user.id)
+                    tasks.new_user_registered_task.delay(user.id)
 
                     return JsonResponse({'Status': True})
                 else:
