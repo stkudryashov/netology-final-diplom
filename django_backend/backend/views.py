@@ -15,7 +15,6 @@ from backend.serializers import UserSerializer, ContactSerializer
 from backend.serializers import OrderItemSerializer, OrderSerializer
 from backend.serializers import ShopSerializer, ProductInfoSerializer, CategorySerializer
 
-from backend.signals import new_user_order
 from backend import tasks
 
 from yaml import load as load_yaml, Loader
@@ -442,7 +441,7 @@ class OrderView(APIView):
                     return JsonResponse({'Status': False, 'Errors': 'Неправильно указаны аргументы'})
                 else:
                     if is_updated:
-                        new_user_order.send(sender=self.__class__, user_id=request.user.id, status='new')
+                        tasks.new_user_registered_task.delay(ser_id=request.user.id, status='new')
                         return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
@@ -481,7 +480,7 @@ class SellerOrderView(APIView):
                 return JsonResponse({'Status': False, 'Errors': str(error)})
             else:
                 if is_updated:
-                    new_user_order.send(sender=self.__class__, user_id=request.user.id, status=status)
+                    tasks.new_user_registered_task.delay(ser_id=request.user.id, status=status)
                     return JsonResponse({'Status': True})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})

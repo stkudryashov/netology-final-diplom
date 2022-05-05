@@ -10,7 +10,9 @@ services:
     env_file:
       - ./.env
     restart: always
+
   backend:
+    container_name: backend
     build: ./django_backend
     command: >
       sh -c "python manage.py makemigrations backend &&
@@ -24,7 +26,9 @@ services:
       - ./.env
     depends_on:
       - database
+
   frontend:
+    container_name: frontend
     build: ./vue_frontend
     command: >
       sh -c "npm run serve"
@@ -35,10 +39,14 @@ services:
       - '8080:8080'
     depends_on:
       - backend
+
   redis:
+    container_name: redis
     image: redis:7.0.0-alpine
     restart: always
+
   celery:
+    container_name: celery
     build: ./django_backend
     command: celery -A config worker --loglevel=INFO
     env_file:
