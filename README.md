@@ -22,6 +22,9 @@ EMAIL_HOST=smtp.yandex.ru
 EMAIL_HOST_USER=email@host.ru
 EMAIL_HOST_PASSWORD=password
 EMAIL_PORT=465
+
+YANDEX_CLIENT_ID=client_id
+YANDEX_SECRET=secret_password
 ```
 * В директории **_netology-final-diplom_** выполнить `docker-compose up --build -d`
 
