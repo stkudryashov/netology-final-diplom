@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.yandex',
 
     'rest_framework',
+    'drf_spectacular',
     'django_filters',
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
@@ -59,7 +60,6 @@ INSTALLED_APPS = [
 
 SITE_ID = 1
 
-# Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
     'yandex': {
         'APP': {
@@ -168,11 +168,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
@@ -217,7 +212,16 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/day',
         'user': '1000/day'
-    }
+    },
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Netology Shop',
+    'DESCRIPTION': 'API for Online Shop',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 

@@ -1,0 +1,629 @@
+openapi: 3.0.3
+info:
+  title: Netology Shop
+  version: 1.0.0
+  description: API for Online Shop
+paths:
+  /api/v1/cart:
+    get:
+      operationId: cart_retrieve
+      description: Класс для работы с корзиной покупателя
+      tags:
+      - cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: cart_create
+      description: Класс для работы с корзиной покупателя
+      tags:
+      - cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: cart_partial_update
+      description: Класс для работы с корзиной покупателя
+      tags:
+      - cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: cart_destroy
+      description: Класс для работы с корзиной покупателя
+      tags:
+      - cart
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/catalog/categories:
+    get:
+      operationId: catalog_categories_list
+      description: Класс для просмотра категорий
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryList'
+          description: ''
+  /api/v1/catalog/products/:
+    get:
+      operationId: catalog_products_list
+      description: Класс для поиска товаров
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: product__category_id
+        schema:
+          type: integer
+          title: Категория
+      - in: query
+        name: product__name
+        schema:
+          type: string
+      - in: query
+        name: shop_id
+        schema:
+          type: integer
+          title: Магазин
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductInfoList'
+          description: ''
+  /api/v1/catalog/products/{id}/:
+    get:
+      operationId: catalog_products_retrieve
+      description: Класс для поиска товаров
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Информация о товаре.
+        required: true
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductInfo'
+          description: ''
+  /api/v1/catalog/shops:
+    get:
+      operationId: catalog_shops_list
+      description: Класс для просмотра списка магазинов
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedShopList'
+          description: ''
+  /api/v1/order:
+    get:
+      operationId: order_retrieve
+      description: Класс для получения заказов и оформления их из корзины
+      tags:
+      - order
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: order_create
+      description: Класс для получения заказов и оформления их из корзины
+      tags:
+      - order
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/seller/orders:
+    get:
+      operationId: seller_orders_retrieve
+      description: Класс для получения заказов продавцами
+      tags:
+      - seller
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: seller_orders_partial_update
+      description: Класс для получения заказов продавцами
+      tags:
+      - seller
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/seller/state:
+    get:
+      operationId: seller_state_retrieve
+      description: Класс для работы со статусом продавца
+      tags:
+      - seller
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: seller_state_create
+      description: Класс для работы со статусом продавца
+      tags:
+      - seller
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/seller/update:
+    post:
+      operationId: seller_update_create
+      description: Класс для обновления каталога от продавца
+      tags:
+      - seller
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/user/contacts:
+    get:
+      operationId: user_contacts_retrieve
+      description: Класс для работы с контактами покупателей
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: user_contacts_create
+      description: Класс для работы с контактами покупателей
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: user_contacts_update
+      description: Класс для работы с контактами покупателей
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: user_contacts_destroy
+      description: Класс для работы с контактами покупателей
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/user/details:
+    get:
+      operationId: user_details_retrieve
+      description: Класс для просмотра и редактирования данных пользователя
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: user_details_create
+      description: Класс для просмотра и редактирования данных пользователя
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/user/login:
+    post:
+      operationId: user_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/user/login/refresh:
+    post:
+      operationId: user_login_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/user/password_reset:
+    post:
+      operationId: user_password_reset_create
+      description: |-
+        An Api View which provides a method to request a password reset token based on an e-mail address
+
+        Sends a signal reset_password_token_created when a reset token was created
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Email'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Email'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+          description: ''
+  /api/v1/user/password_reset/confirm:
+    post:
+      operationId: user_password_reset_confirm_create
+      description: An Api View which provides a method to reset a password based on
+        a unique token
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordToken'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordToken'
+          description: ''
+  /api/v1/user/register:
+    post:
+      operationId: user_register_create
+      description: Регистрация пользователя
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/user/register/confirm:
+    post:
+      operationId: user_register_confirm_create
+      description: Класс для подтверждения почтового адреса
+      tags:
+      - user
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Название
+          maxLength: 40
+      required:
+      - id
+      - name
+    Email:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    PaginatedCategoryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    PaginatedProductInfoList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInfo'
+    PaginatedShopList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Shop'
+    PasswordToken:
+      type: object
+      properties:
+        password:
+          type: string
+        token:
+          type: string
+      required:
+      - password
+      - token
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          title: Название
+          maxLength: 80
+        category:
+          type: string
+          readOnly: true
+      required:
+      - category
+      - name
+    ProductInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        model:
+          type: string
+          title: Модель
+          maxLength: 80
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        shop:
+          type: integer
+          title: Магазин
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Количество
+        price:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Цена
+        price_rrc:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          title: Рекомендуемая розничная цена
+        product_parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductParameter'
+          readOnly: true
+      required:
+      - id
+      - price
+      - price_rrc
+      - product
+      - product_parameters
+      - quantity
+    ProductParameter:
+      type: object
+      properties:
+        parameter:
+          type: string
+          readOnly: true
+        value:
+          type: string
+          title: Значение
+          maxLength: 128
+      required:
+      - parameter
+      - value
+    Shop:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Название
+          maxLength: 50
+        state:
+          type: boolean
+          title: Принимает заказы
+      required:
+      - id
+      - name
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
