@@ -1,8 +1,12 @@
 from django.http import JsonResponse
 from django.db import IntegrityError
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
+
 from rest_framework.views import APIView
 
 from django.core.exceptions import ValidationError
@@ -288,6 +292,8 @@ class SellerState(APIView):
 
 class ProductInfoView(ReadOnlyModelViewSet):
     """Класс для поиска товаров"""
+
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     queryset = ProductInfo.objects.filter(shop__state=True).select_related(
         'shop', 'product__category'
