@@ -15,7 +15,8 @@ services:
     container_name: backend
     build: ./django_backend
     command: >
-      sh -c "python manage.py makemigrations backend &&
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py makemigrations backend &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:

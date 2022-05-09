@@ -7,6 +7,8 @@ ENV PYTHONUNBUFFERED 1
 # set work directory
 WORKDIR /usr/src/app
 
+RUN apk update && apk add libressl-dev postgresql-dev libffi-dev gcc musl-dev python3-dev
+
 # install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
