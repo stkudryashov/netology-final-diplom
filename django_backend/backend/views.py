@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.db import IntegrityError
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.views import APIView
@@ -8,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
 from django.contrib.auth.password_validation import validate_password
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from backend.filters import ProductInfoFilter
 
@@ -284,7 +286,7 @@ class SellerState(APIView):
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
 
 
-class ProductInfoView(ListAPIView):
+class ProductInfoView(ReadOnlyModelViewSet):
     """Класс для поиска товаров"""
 
     queryset = ProductInfo.objects.filter(shop__state=True).select_related(
@@ -292,17 +294,9 @@ class ProductInfoView(ListAPIView):
     ).prefetch_related('product_parameters__parameter').distinct()
 
     serializer_class = ProductInfoSerializer
-    filterset_class = ProductInfoFilter
 
-
-class ProductInfoRetrieve(RetrieveAPIView):
-    """Класс для получения конкретного товара"""
-
-    queryset = ProductInfo.objects.filter(shop__state=True).select_related(
-        'shop', 'product__category'
-    ).prefetch_related('product_parameters__parameter').distinct()
-
-    serializer_class = ProductInfoSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('product__name', 'shop_id', 'product__category_id')
 
 
 class CategoryView(ListAPIView):
